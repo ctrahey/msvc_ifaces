@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: "Atomic FT FIFO"
+  description: "A FIFO queue that provides atomic pops with fault-tollerence semantics. That is, items are semi-popped (checked out), and automatically return to the queue unless the service is explicitly notified that the pop should finalize."
+  version: "0.0.0"
+  contact:
+    email: "christrahey@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: "example.com/some_mount_point:port"
+  - description: Clients SHUOLD treat the url as an opaque value.
+tags:
+- name: "SOLID"
+  description: "Guided by best-practice OOP design principles"
+  externalDocs:
+    description: "Learn more about SOLID"
+    url: "https://en.wikipedia.org/wiki/SOLID"
+paths:
+  /{queue}:
+    post:
+      summary: "Append an item to the end of the queue"
+      operationId: push
+      parameters:
+      - in: "path"
+        name: "queue"
+        description: "This server may manage multiple queues. Clients can specify."
+        required: true
+        schema:
+          $ref: "#/definitions/string"
+      requestBody:
+        description: The value to push into the queue
+        required: True
+        content:
+          application/octet-stream
+            schema:
+            type: any
+      responses:
+        404:
+          description: "The queue does not exist and could not be created"
+        201:
+          description: "The item was added successfully"
+  /{queue}/checkout:
+    post:
+      summary: "(semi) Pop an item from the front of the queue. The item will automatically return to the queue after a timeout if /commit is not called soon!"
+      parameters:
+      - in: "path"
+        name: "queue"
+        description: "This server may manage multiple queues. Clients can specify."
+        required: true
+      requestBody:
+        description: Metadata for the checkout. Not currently used but may in the future contain e.g. expected time to completion.
+        required: False
+        content:
+          application/json
+      responses:
+        201:
+          description: "The checkout was successful."
+      operationId: "checkout"

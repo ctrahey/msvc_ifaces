@@ -1,0 +1,8 @@
+components:
+  parameters:
+    dependency_resolver:
+      in: query
+      name: dependency_resolver
+      schema:
+        type: string
+      description: the URI for the dependency resolver that shuold be used for this request.

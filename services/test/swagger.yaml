@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: "TESTING Atomic FT FIFO"
+  description: "A FIFO queue that provides atomic pops with fault-tollerence semantics. That is, items are semi-popped (checked out), and automatically return to the queue unless the service is explicitly notified that the pop should finalize."
+  version: "0.0.0"
+  contact:
+    email: "christrahey@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: "example.com/some_mount_point:port"
+  - description: Clients SHUOLD treat the url as an opaque value.
+paths:
+  /{queue}:
+    summary: "A queue"
+    description: "A list of things, first in, first out."
+    post:
+      summary: "Append an item to the queue"
+      description: >
+        Appends the request's entity body to the end of the queue'
+      operationId: append
+      parameters:
+      - $ref: '../common.yaml#/components/parameters/dependency_resolver'
+      - in: "path"
+        name: "queue"
+        description: "This server may manage multiple queues. Clients can specify."
+        required: true
+        
+      responses:
+        200:
+          description: "The item was added successfully"
+

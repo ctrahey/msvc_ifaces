@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: "Cache"
+  description: "A simple key-value Cache."
+  version: "0.0.0"
+  contact:
+    email: "christrahey@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: "example.com/some_mount_point:port"
+  - description: Clients SHUOLD treat the url as an opaque value.
+tags:
+- name: "SOLID"
+  description: "Guided by best-practice OOP design principles"
+  externalDocs:
+    description: "Learn more about SOLID"
+    url: "https://en.wikipedia.org/wiki/SOLID"
+paths:
+  /{key}:
+    get:
+      summary: "Retrieve the current value of {key} in this cache"
+      operationId: get
+      parameters:
+      - in: "path"
+        name: "key"
+        description: "The key for this request. URL-safe Base64-encoded."
+        required: true
+        schema:
+          $ref: "#/definitions/b64string"
+      responses:
+        404:
+          description: "That key does not exist in this cache"
+        200:
+          description: "Response body is the value retrieved from the cache"
+    put:
+      summary: "Set the value of {key} in this cache to the bytes in the entity body"
+      parameters:
+      - in: "path"
+        name: "key"
+        description: "The key for this request. URL-safe Base64-encoded."
+        required: true
+        schema:
+          $ref: "#/definitions/b64string"
+      requestBody:
+        description: The value to set
+        required: True
+        content:
+          application/octet-stream
+            schema:
+            type: any
+      responses:
+        200:
+          description: "The value has been stored"
+      operationId: "set"
