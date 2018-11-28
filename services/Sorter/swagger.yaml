@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: "Atomic FT FIFO"
-  description: "A FIFO queue that provides atomic pops with fault-tollerence semantics. That is, items are semi-popped (checked out), and automatically return to the queue unless the service is explicitly notified that the pop should finalize."
+  title: "Sorter"
+  description: "Takes two operands, returns -1, 0, or 1"
   version: "0.0.0"
   contact:
     email: "christrahey@gmail.com"
@@ -18,24 +18,23 @@ tags:
     description: "Learn more about SOLID"
     url: "https://en.wikipedia.org/wiki/SOLID"
 paths:
-  /{queue}:
-    post:
-      summary: "Append an item to the end of the queue"
-      operationId: push
+  /sort/{lhs}/{rhs}:
+    get:
+      summary: "Sort"
+      operationId: sort
       parameters:
       - in: "path"
-        name: "queue"
-        description: "This server may manage multiple queues. Clients can specify."
+        name: "lhs"
+        description: "Left-hand-side. If this is the greater value, returns 1"
         required: true
         schema:
           $ref: "#/definitions/string"
-      requestBody:
-        description: The value to push into the queue
-        required: True
-        content:
-          application/octet-stream
-            schema:
-            type: any
+      - in: "path"
+        name: "rhs"
+        description: "Right-hand-side. If this is the greater value, returns -1"
+        required: true
+        schema:
+          $ref: "#/definitions/string"
       responses:
         404:
           description: "The queue does not exist and could not be created"
