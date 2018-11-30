@@ -1,0 +1,130 @@
+openapi: 3.0.0
+info:
+  title: Accounting Journal
+  description: >
+    A General Journal service, GAAP compliant with a few additions for currency and commerce.
+  version: 0.0.1
+components:
+  schemas:
+    EconomicAmount:
+      properties:
+        value:
+          type: number
+          format: float
+        denomination:
+          type: string
+          description: currency, commodity, etc
+    JournalEntryLine:
+      properties:
+        account:
+          type: string
+          format: uuid
+        drcr:
+          type: string
+          enum: [debit, credit]
+        amount:
+          $ref: '#/components/schemas/EconomicAmount'
+    JournalEntry:
+      properties:
+        schema_version:
+          type: string
+          format: semver
+        timestamp:
+          type: string
+          format: date-time
+        uuid:
+          type: string
+          format: uuid
+          description: Set by this service.
+        description:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/componenets/schemas/JournalEntryLine'
+    ArrayOfJournalEntries:
+      type: Array
+      items:
+        $ref: '#/components/schemas/JournalEntry'
+  parameters:
+    Entity:
+      - in: path
+        name: entity
+        schema:
+          type: string
+          format: uuid
+        required: true
+        description: UUID of the Economic Entity
+    JournalEntry:
+      - in: path
+        name: entry
+        schema:
+          type: string
+          format: uuid
+        required: true
+        description: UUID of the Journal Entry
+    Since:
+      - in: query
+        name: since
+        schema:
+          type: string
+          format: date-time
+        required: false
+        description: Exclude any entries prior to provided date.
+    After:
+      - in: query
+        name: after
+        schema:
+          type: string
+          format: uuid
+        required: false
+        description: Exclude any entries prior to the entry referred to by uuid
+
+paths:
+  /{entity}/journal:
+    get:
+      summary: An entity's General Journal (a time-series of Journal Entries)
+      parameters:
+        - name: since
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfJournalEntries'
+        
+    post:
+      summary: Post an entry to this entity's journal
+      requestBody:
+        description: A journal entry
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/componenets/scemas/JournalEntry'
+      responses:
+        '201':
+          description: Created. Entry successfully journaled. Response inludes newly minted uuid.
+          content:
+            application/json:
+              schema:
+                $ref '#/components/schemas/JournalEntry'
+        '400':
+          description: Bad Request. Request is malformed or could not be understood
+        '409':
+          description: Conflict. Debits do not equal Credits
+        '404':
+          description: Economic Entity not found
+    
+  /{entity}/journal/entry/{entry_id}:
+    get:
+      summary: An individual journal entry
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalEntry'
+        '404':
+          description: That entry could not be found
+
