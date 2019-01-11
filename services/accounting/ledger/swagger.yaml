@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: Accounting Journal
+  description: >
+    A General Ledger service, GAAP compliant with a few additions for currency and commerce.
+  version: 0.0.1
+components:
+  schemas:
+    EconomicEntity:
+      type: string
+      format: uri
+    EconomicAmount:
+      properties:
+        value:
+          type: number
+          format: float
+        denomination:
+          type: string
+          description: currency, commodity, etc
+    JournalEntryLine:
+      properties:
+        account:
+          type: string
+          format: uuid
+        drcr:
+          type: string
+          enum: [debit, credit]
+        amount:
+          $ref: '#/components/schemas/EconomicAmount'
+    ArrayOfJournalEntryLines:
+      type: Array
+      items:
+        $ref: '#/components/schemas/JournalEntryLine'
+    LedgerBalance:
+      additionalProperties:
+        description: Key is the currency identifier
+        type: object
+        $ref: '#/components/schemas/CurrencyBalance'
+    CurrencyBalance:
+      properties:
+        drcr:
+          type: string
+          enum: [debit, credit]
+        value:
+          type: number
+          format: float
+  parameters:
+    JournalEntry:
+      - in: path
+        name: entry
+        schema:
+          type: string
+          format: uuid
+        required: true
+        description: UUID of the Journal Entry
+    Since:
+      - in: query
+        name: since
+        schema:
+          type: string
+          format: date-time
+        required: false
+        description: Exclude any entries prior to provided date.
+    After:
+      - in: query
+        name: after
+        schema:
+          type: string
+          format: uuid
+        required: false
+        description: Exclude any entries prior to the entry referred to by uuid
+
+paths:
+  /{entity}/{account}:
+    get:
+      summary: Retrieve ledger balance
+      parameters:
+        - name: since
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LedgerBalance'
+        '404':
+          description: Economic Entity or account not found
+
+    post:
+      summary: add a series of amounts to this ledger
+      parameters:
+        - in: header
+          name: If-Match
+          description: >
+            Used to assert the state of the ledger. ETag here can/should be a unique identifier for
+            the most recent entry prior to this one that is expected to be already in the ledger.
+            Use an empty string or "0" when posting the first-ever line to a ledger.
+          schema:
+            type: string
+            format: ETag
+      requestBody:
+        description: A journal entry line
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                lines:
+                  type: array
+                  items:
+                    $ref: '#/componenets/scemas/JournalEntryLine'
+      responses:
+        '201':
+          description: Created. Entry successfully posted. Response is new ledger balance.
+          content:
+            application/json:
+              schema:
+                $ref '#/components/schemas/LedgerBalance'
+        '400':
+          description: Bad Request. Request is malformed or could not be understood
+        '412':
+          description: The ETag provided is not a match for the state of this ledger.
+        '404':
+          description: Economic Entity or account not found

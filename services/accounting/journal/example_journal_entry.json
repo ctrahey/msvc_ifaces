@@ -1,0 +1,24 @@
+{
+  "schema_version": "0.0.1",
+  "timestamp": "0123456789",
+  "entity": "schema.zinkmedia.com/discogs/user/1234",
+  "description": "A sample journal entry",
+  "lines": [
+    {
+      "account":"schema.zinkmedia.com/accounting/account/asset/cash",
+      "drcr": "debit",
+      "amount": {
+        "value": 100.00,
+        "denomination": "schema.zinkmedia.com/accounting/currency/usd"
+      }
+    },
+    {
+      "account":"schema.zinkmedia.com/accounting/account/equity/capital",
+      "drcr": "credit",
+      "amount": {
+        "value": 100.00,
+        "denomination": "schema.zinkmedia.com/accounting/currency/usd"
+      }
+    }
+  ]
+}

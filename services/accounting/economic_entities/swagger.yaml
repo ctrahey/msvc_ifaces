@@ -1,58 +1,21 @@
 openapi: 3.0.0
 info:
-  title: Accounting Journal
+  title: Economic Entities
   description: >
-    A General Journal service, GAAP compliant with a few additions for currency and commerce.
+    A service to resolve economic identity identifiers to more pertinent details about them.
   version: 0.0.1
 components:
   schemas:
-    EconomicEntity:
+    EconomicEntityIdentifier:
       type: string
       format: uri
-    EconomicAmount:
-      properties:
-        value:
-          type: number
-          format: float
-        denomination:
+    EconomicEntity:
+      parameters:
+        title:
           type: string
-          description: currency, commodity, etc
-    JournalEntryLine:
-      properties:
-        account:
+        entity_type:
           type: string
-          format: uuid
-        drcr:
-          type: string
-          enum: [debit, credit]
-        amount:
-          $ref: '#/components/schemas/EconomicAmount'
-        realted_entity:
-          $ref: '#/compoenents/schemas/EconomicEntity'
-    JournalEntry:
-      properties:
-        schema_version:
-          type: string
-          format: semver
-        timestamp:
-          type: string
-          format: date-time
-        uuid:
-          type: string
-          format: uuid
-          description: Set by this service.
-        entity:
-          $ref: '#/compoenents/schemas/EconomicEntity'
-        description:
-          type: string
-        lines:
-          type: array
-          items:
-            $ref: '#/componenets/schemas/JournalEntryLine'
-    ArrayOfJournalEntries:
-      type: Array
-      items:
-        $ref: '#/components/schemas/JournalEntry'
+          description: 
   parameters:
     JournalEntry:
       - in: path
@@ -80,18 +43,15 @@ components:
         description: Exclude any entries prior to the entry referred to by uuid
 
 paths:
-  /{entity}/journal:
+  /entity/{entity}
     get:
-      summary: An entity's General Journal (a time-series of Journal Entries)
-      parameters:
-        - name: since
+      summary: An Economic Entity
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayOfJournalEntries'
-        
+                $ref: '#/components/schemas/EconomicEntity'
     post:
       summary: Post an entry to this entity's journal
       requestBody:
